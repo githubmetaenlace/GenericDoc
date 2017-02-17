@@ -112,14 +112,17 @@ angular.module('app.secciones')
 				$rootScope.overlay.hideOverlay();
 				$scope.insert=false;
 				$scope.dataSel=data;
+				$scope.refreshAttachments();
 			}, $rootScope.overlay.errorManager);
 		} else {
 			apiSeccion.update({id:$scope.dataSel.ID}, $scope.dataSel, function(data){
 				$rootScope.overlay.hideOverlay();
 				$scope.insert=false;
 				$scope.dataSel=data;
+				$scope.refreshAttachments();
 			}, $rootScope.overlay.errorManager);
 		};
+		
 	}
 	
 	

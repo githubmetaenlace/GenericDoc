@@ -1,8 +1,6 @@
 package es.maltimor.genericDoc.dao;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +10,6 @@ import es.maltimor.genericDoc.openOffice.Compressor;
 import es.maltimor.genericDoc.openOffice.GetPDF2;
 import es.maltimor.genericDoc.openOffice.TOpenOffice;
 import es.maltimor.genericDoc.parser.BasicParser;
-import es.maltimor.genericDoc.parser.BasicParser3;
 import es.maltimor.genericDoc.utils.FilesUtils;
 import es.maltimor.genericRest.GenericServiceDao;
 import es.maltimor.genericUser.User;

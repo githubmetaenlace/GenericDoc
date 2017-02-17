@@ -1,15 +1,6 @@
 package es.maltimor.genericDoc.dao;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
-import javax.ws.rs.core.UriInfo;
-
-import es.maltimor.genericRest.GenericMapperInfoColumn;
-import es.maltimor.genericRest.GenericMapperInfoTable;
-import es.maltimor.genericRest.GenericMapperInfoTableResolver;
-import es.maltimor.genericUser.User;
 
 public class GenericDocServiceMapperProvider {
 
