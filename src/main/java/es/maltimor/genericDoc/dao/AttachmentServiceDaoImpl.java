@@ -11,13 +11,15 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
 import org.apache.naming.resources.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import es.maltimor.genericDoc.utils.FilesUtils;
 
 public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 	final Logger log = LoggerFactory.getLogger(AttachmentServiceDaoImpl.class);
 	private DirContext dirContext;
+	private String ruta;
 	
 	private static String separator = File.separator;
 	
@@ -28,6 +30,12 @@ public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 		this.dirContext = dirContext;
 	}
 
+	public String getRuta() {
+		return ruta;
+	}
+	public void setRuta(String ruta) {
+		this.ruta = ruta;
+	}
 	public boolean hasAttachments(String dbid, String unid) throws Exception {
 		try {
 			log.debug("@@@@@@@@@@@@@@@@@@@@@ AttachService.hasAttachments:"+dbid+" "+unid);
@@ -149,15 +157,23 @@ public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 	public void addAttachment(String dbid, String unid, Attachment attach) throws Exception {
 		log.debug("@@@@@@@@@@@@@@@@@@@@@ AttachService.addAttachmentsName:"+dbid+" "+unid+" "+attach);
 		try {
+			
 			Resource resource = new Resource(attach.getBytes());
 			//preparo el sistema
-			FilesUtils.preparaPath(dbid+separator+unid+separator, false);
+			FilesUtils.preparaPath(ruta+separator+dbid+separator+unid+separator, false);
 			log.debug("Antes de create");
-			try { dirContext.createSubcontext(dbid+separator+unid); } catch (Exception e){}
+			try { 
+				dirContext.createSubcontext(ruta+separator+dbid+separator+unid); 
+
+				} catch (Exception e){}
+			log.info("Ruta: "+ruta);
+			File theDir = new File(ruta+separator+dbid+separator+unid);
+			theDir.mkdir();
 			String name = attach.getName();
 			name = name.replace("\\", "/");
 			int i1 = name.lastIndexOf("/");
 			if (i1>0) name = name.substring(i1+1);
+			
 			log.debug("Antes de rebind:name="+name);
 			dirContext.rebind(dbid+separator+unid+separator+name, resource);
 			log.debug("OK");
@@ -209,5 +225,6 @@ public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 		}
 		return res;
 	}
+
 
 }
