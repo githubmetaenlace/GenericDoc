@@ -61,7 +61,6 @@ public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 
 	public List<String> getAllAttachmentsNames(String dbid, String unid) throws Exception {
 		log.debug("@@@@@@@@@@@@@@@@@@@@@ AttachService.getAllAttachmentsNames:"+ruta+separator+dbid+" "+unid);
-		System.out.println("@@@@@@@@@@@@@@@@@@@@@ AttachService.getAllAttachmentsNames:"+ruta+separator+dbid+" "+unid);
 		List<String> lres = new ArrayList<String>();
 		try {
 			NamingEnumeration<NameClassPair> list = dirContext.list(dbid+separator+unid);
