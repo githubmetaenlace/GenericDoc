@@ -39,7 +39,9 @@ public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 	public boolean hasAttachments(String dbid, String unid) throws Exception {
 		try {
 			log.debug("@@@@@@@@@@@@@@@@@@@@@ AttachService.hasAttachments:"+dbid+" "+unid);
-			NamingEnumeration<NameClassPair> list = dirContext.list(dbid+separator+unid);
+			String rutaDir = dbid+separator+unid;
+			rutaDir = rutaDir.replace("\\", "/");
+			NamingEnumeration<NameClassPair> list = dirContext.list(rutaDir);
 			return list.hasMore();
 //			Object obj = dirContext.lookup(dbid+separator+unid);
 //			return true;
@@ -58,14 +60,15 @@ public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 	}
 
 	public List<String> getAllAttachmentsNames(String dbid, String unid) throws Exception {
-		log.debug("@@@@@@@@@@@@@@@@@@@@@ AttachService.getAllAttachmentsNames:"+dbid+" "+unid);
+		log.debug("@@@@@@@@@@@@@@@@@@@@@ AttachService.getAllAttachmentsNames:"+ruta+separator+dbid+" "+unid);
+		System.out.println("@@@@@@@@@@@@@@@@@@@@@ AttachService.getAllAttachmentsNames:"+ruta+separator+dbid+" "+unid);
 		List<String> lres = new ArrayList<String>();
 		try {
 			NamingEnumeration<NameClassPair> list = dirContext.list(dbid+separator+unid);
 			while (list.hasMore()) {
 				NameClassPair nc = (NameClassPair)list.next();
 				log.debug("nc="+nc);
-
+				
 				String fileName = nc.getName();
 				try{
 					//Cualquier error aqui no insertara el attachment y prosigue con el siguiente
@@ -160,7 +163,7 @@ public class AttachmentServiceDaoImpl implements AttachmentServiceDao {
 			
 			Resource resource = new Resource(attach.getBytes());
 			//preparo el sistema
-			FilesUtils.preparaPath(ruta+separator+dbid+separator+unid+separator, false);
+			FilesUtils.preparaPath(ruta+dbid+separator+unid+separator, false);
 			log.debug("Antes de create");
 			try { 
 				dirContext.createSubcontext(ruta+separator+dbid+separator+unid); 
