@@ -19,6 +19,7 @@ public class GenericDocServiceDaoImpl implements GenericDocServiceDao {
 	private GenericDocServiceMapper mapper;
 	private GenericServiceDao gservice;
 	private String tempPath;
+	private String attachDocBase;
 	private static String separator = File.separator;
 	
 	
@@ -40,6 +41,12 @@ public class GenericDocServiceDaoImpl implements GenericDocServiceDao {
 	public void setTempPath(String tempPath) {
 		this.tempPath = tempPath;
 	}
+	public String getAttachDocBase() {
+		return attachDocBase;
+	}
+	public void setAttachDocBase(String attachDocBase) {
+		this.attachDocBase = attachDocBase;
+	}
 	public GenericDocServiceMapper getMapper() {
 		return mapper;
 	}
@@ -60,11 +67,16 @@ public class GenericDocServiceDaoImpl implements GenericDocServiceDao {
 		
 		//descargo el adjunto en el temporal
 		Attachment attach = attachService.getAttachment(dbid, unid, name);
+		Attachment attach2 = attachService.getAttachment(dbid, unid, name);
 		if (attach==null) throw new Exception("No existe el adjunto");
+		if (attach2==null) throw new Exception("No existe el adjunto");
 		
 		String path = tempPath+separator+dbid+separator+unid+separator;
+		//G:\PROYECTO JAVA\GENERICDOC\GenericDoc\Attachments\1\689
+		String path2 = "H:"+separator+"Proyectos Java"+separator+"CARM EDUCACION"+separator+"GenericDoc"+separator+"Attachments"+separator+dbid+separator+unid+separator;
 		attach.extractFile(path+name);
-
+		attach2.extractFile(path2+name);
+		
 		//Código que llama al servidor de tomcat y ejecuta el servlet de generacion del PDF, HTML y TXT (ademas inserta el content y el styles)
 		if (GetPDF2.ejecutar(too, 0, path, name, "", "S", "S", "S", "N")){
 			int i1 = name.lastIndexOf(".");
@@ -88,14 +100,40 @@ public class GenericDocServiceDaoImpl implements GenericDocServiceDao {
 			params.put("html", html);
 			mapper.updateHTMLyTXT(params);
 		} else throw new Exception("No se ha podido generar el PDF");
+		
+		//Path nuevo
+		if (GetPDF2.ejecutar(too, 0, path2, name, "", "S", "S", "S", "N")){
+			int i1 = name.lastIndexOf(".");
+			if (i1==-1) i1=name.length();
+			String nameTXT = name.substring(0,i1)+".txt";
+			String nameHTML = name.substring(0,i1)+".html";
+			
+			System.out.println("updateElement: outputfile="+path2 + nameTXT);
+			byte[] buff = FilesUtils.getBytesFromFile(path2 + nameTXT);
+			String txt = new String(buff);
+
+			System.out.println("updateElement: outputfile="+path2 + nameHTML);
+			buff = FilesUtils.getBytesFromFile(path2 + nameHTML);
+			String html = new String(buff);
+			System.out.println("updateElement....");
+			Map<String,Object> params2 = new HashMap<String,Object>();
+			params2.put("table", table);
+			params2.put("dbid", dbid);
+			params2.put("unid", unid);
+			params2.put("txt", txt.substring(0,txt.length()<4000?txt.length():4000));
+			params2.put("html", html);
+			mapper.updateHTMLyTXT(params2);
+		} else throw new Exception("No se ha podido generar el PDF");
 	}
 
 	public void actualizarModelo(String dbid, String unid, String fileName) throws Exception {
 		//extraigo los documentos de las secciones que componen el modelo
 		//llamo a modificar para concatenarlos
 		//adjunto el resultado en el modelo
-		String basePath = tempPath+separator+dbid+separator+unid+separator;
+		String basePath = tempPath + separator;
+		String pathModelos = attachDocBase+separator+dbid+separator+unid+separator;
 		basePath=basePath.replace("\\", "/");
+		pathModelos = pathModelos.replace("\\", "/");
 		String listaCuerpos = "";
 		
 		System.out.println("Actualiza Modelo:"+dbid+" "+unid+" "+fileName+" "+basePath);
@@ -123,19 +161,23 @@ public class GenericDocServiceDaoImpl implements GenericDocServiceDao {
 		}
 		
 		TOpenOffice too = TOpenOffice.getOffice();
+		System.out.println("TOO-> " + too + " ---- " + "BASEPATH-> " + basePath + " ---- " + "LISTACUERPOS-> " + listaCuerpos + " ---- " + "FILENAME-> " + fileName);
+		
 		too.inicializaOO();
 		
 		fileName+=".odt";
-		
-		if (ComponerOO2.yoCompongo(too, 1, basePath, listaCuerpos, fileName)){
+		File theDir = new File(pathModelos);
+		theDir.mkdir();
+		if (ComponerOO2.yoCompongo(too, 1, basePath, pathModelos, listaCuerpos, fileName)){
 			//me cargo todos los adjuntos del modelo e inserto este nuevo
 			attachService.deleteAllAttachments(dbid, unid);
 			//ahora inserto el adjunto
-			byte[] buff = FilesUtils.getBytesFromFile(basePath+fileName);
+			byte[] buff = FilesUtils.getBytesFromFile(basePath+ separator +fileName);
 			Attachment attach = new Attachment();
 			attach.setBytes(buff);
 			attach.setName(fileName);
 			attachService.addAttachment(dbid, unid, attach);
+			
 		} else throw new Exception("No se ha podido generar el modelo");
 	}
 	
@@ -155,7 +197,7 @@ public class GenericDocServiceDaoImpl implements GenericDocServiceDao {
 		String basePath = tempPath+separator+dbid+separator+unid_doc+separator;
 		basePath=basePath.replace("\\", "/");
 		String fileNameDoc=basePath+fileName+".odt";		//TODO poner algo en funcion de parametros del modelo
-
+		//FILENAMEDOC es la ruta y el nombre del doc a crear
 		for(String name:attachService.getAllAttachmentsNames(dbid, unid)){
 			Attachment att = attachService.getAttachment(dbid, unid, name);
 			if (att==null) throw new Exception("No encuentro el adjunto asociado al modelo");

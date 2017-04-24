@@ -52,7 +52,11 @@ angular.module('app.newDoc')
 			$scope.dependencias=$scope.aditionalDeps;
 			//construir el array de dependencias e iniciarlo con los valores prefijados en la url
 			for(var i=0;i<data.length;i++){
-				var key = data[i].DEPENDENCIAS;
+				arr = data[i].DEPENDENCIAS.split(',');
+				
+				for(var j=0;j<arr.length;j++){
+				
+				var key = arr[j];
 				var valor = $scope.params[key];
 				if (valor==undefined) valor='';
 				$scope.dependencias[key]=valor;
@@ -65,6 +69,7 @@ angular.module('app.newDoc')
 					if ($scope.params[key]!=undefined) $scope.dependencias.push({KEY:key, VALOR:$scope.params[key]});
 					else $scope.dependencias.push({KEY:key});
 				}*/
+				}
 			}
 			console.log($scope.dependencias);
 			
@@ -76,11 +81,13 @@ angular.module('app.newDoc')
 		if ($rootScope.user.attr.DATABASE) $scope.databaseSel = $rootScope.user.attr.DATABASE;
 	});	
 
+	var ID=$routeParams.ID_DB;
 	//LUPAS
 	var lupaModelos={
-			title:'Seleccione un docuento',
+			title:'Seleccione un documento',
 			url:appConfig.urlBase+'/VIEW_MODELOS/:id',
 			orderby:'FILENAME',
+			filter: '[ID_DB]=='+ID,
 			fields:'DB_FILENAME,FILENAME',
 			size:'lg'
 	}
@@ -164,12 +171,14 @@ angular.module('app.newDoc')
 	 */
 	console.log('DATA MODELO');
 	console.log($scope.params);
+	console.log('termino');
 	//aditionalDependences y asignar valores
 	if ($scope.params.aditionalDeps!=undefined){
 		var deps = $scope.params.aditionalDeps.split(',');
 		for(var i=0;i<deps.length;i++){
 			var key = deps[i];
 			var valor = $scope.params[key];
+			console.log(valor);
 			if (valor==undefined) valor='';
 			$scope.aditionalDeps[key]=valor;
 			/*
